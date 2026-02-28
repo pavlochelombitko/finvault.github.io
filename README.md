@@ -24,14 +24,7 @@ All three calculators support **8 currencies**: USD, EUR, GBP, JPY, CHF, CAD, AU
 
 ## Getting Started
 
-It's a single HTML file. No build steps, no dependencies, no setup.
-
-```
-git clone https://github.com/YOUR_USERNAME/finvault.git
-open finvault.html
-```
-
-Or just download `finvault.html` and open it in any browser.
+Just download `finvault.html` and open it in any browser.
 
 ---
 
