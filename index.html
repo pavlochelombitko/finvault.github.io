@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinVault — Investment Intelligence Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=Space+Mono:wght@400;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #06090f;
+    --bg-secondary: #0d1117;
+    --bg-card: rgba(13, 17, 23, 0.75);
+    --bg-input: rgba(6, 9, 15, 0.9);
+    --border: rgba(56, 189, 248, 0.08);
+    --border-hover: rgba(56, 189, 248, 0.22);
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --accent-dim: rgba(56, 189, 248, 0.12);
+    --accent-glow: rgba(56, 189, 248, 0.35);
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.12);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.12);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251, 191, 36, 0.12);
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #475569;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --font-display: 'Playfair Display', serif;
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* BG */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.025) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+  .bg-glow { position: fixed; z-index: 0; pointer-events: none; border-radius: 50%; filter: blur(140px); opacity: 0.12; }
+  .bg-glow.a { width: 700px; height: 700px; top: -300px; left: -200px; background: var(--accent); }
+  .bg-glow.b { width: 600px; height: 600px; bottom: -250px; right: -150px; background: #7c3aed; }
+
+  /* CONTAINER */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* HEADER */
+  header {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(24px);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(6, 9, 15, 0.8);
+    text-align: center;
+  }
+  .logo {
+    font-family: var(--font-display); font-size: 1.6rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+  .logo-sub {
+    font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+    letter-spacing: 3.5px; text-transform: uppercase; display: block; margin-top: 2px;
+  }
+
+  /* HERO */
+  .hero { padding: 72px 0 56px; text-align: center; animation: fadeUp .7s ease-out; }
+  .hero h1 {
+    font-family: var(--font-display); font-size: clamp(2.2rem, 5.5vw, 4rem);
+    font-weight: 900; line-height: 1.1; margin-bottom: 18px;
+    background: linear-gradient(135deg, #f1f5f9 30%, #64748b 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: var(--text-secondary); font-size: 1.05rem; max-width: 540px; margin: 0 auto 36px; line-height: 1.7; }
+
+  /* SECTIONS */
+  section { padding: 64px 0; }
+  .section-label {
+    font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase;
+    letter-spacing: 4px; color: var(--accent); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::before { content: ''; width: 28px; height: 1px; background: var(--accent); }
+  .section-title { font-family: var(--font-display); font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 900; margin-bottom: 12px; line-height: 1.2; }
+  .section-desc { color: var(--text-secondary); max-width: 520px; line-height: 1.7; margin-bottom: 40px; font-size: 0.95rem; }
+
+  /* CARDS */
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+    backdrop-filter: blur(12px); transition: all .35s ease;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity .35s;
+  }
+  .card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .card:hover::before { opacity: 1; }
+
+  /* FORM ELEMENTS */
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .calc-form { display: flex; flex-direction: column; gap: 18px; }
+  .input-group { display: flex; flex-direction: column; gap: 5px; }
+  .input-group label {
+    font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 1.5px; font-weight: 500;
+  }
+  .input-group input, .input-group select {
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 15px;
+    color: var(--text-primary); font-family: var(--font-mono); font-size: 0.95rem;
+    transition: all .3s; outline: none; width: 100%;
+  }
+  .input-group input:focus, .input-group select:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .input-group select { cursor: pointer; }
+  .input-group select option { background: var(--bg-secondary); }
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .btn-calc {
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    color: #060910; border: none; border-radius: 10px;
+    padding: 15px 28px; font-family: var(--font-body);
+    font-size: 0.88rem; font-weight: 700; cursor: pointer;
+    transition: all .3s; letter-spacing: .5px; text-transform: uppercase;
+    width: 100%;
+  }
+  .btn-calc:hover { box-shadow: 0 6px 28px var(--accent-glow); transform: translateY(-1px); }
+  .btn-calc:active { transform: translateY(0); }
+
+  /* RESULT PANEL */
+  .result-panel {
+    background: linear-gradient(145deg, rgba(56,189,248,0.04), rgba(139,92,246,0.03));
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 32px; min-height: 300px;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .result-placeholder { text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+  .result-placeholder .icon { font-size: 2.2rem; margin-bottom: 10px; opacity: .35; }
+  .result-content { position: relative; z-index: 1; }
+  .result-big { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; color: var(--green); margin-bottom: 6px; }
+  .result-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+  .result-breakdown { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .result-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .result-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .result-row .rr-label { color: var(--text-secondary); font-size: 0.85rem; }
+  .result-row .rr-value { font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; }
+  .result-row .rr-value.green { color: var(--green); }
+  .result-row .rr-value.accent { color: var(--accent); }
+  .result-row .rr-value.red { color: var(--red); }
+
+  .year-table { margin-top: 20px; max-height: 240px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--border); }
+  .year-table table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .year-table th {
+    position: sticky; top: 0; background: rgba(6,9,15,0.97); z-index: 2;
+    padding: 9px 12px; text-align: left; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .year-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.78rem; }
+  .year-table tr:last-child td { border-bottom: none; }
+  .year-table tr:hover td { background: rgba(56,189,248,0.02); }
+
+  /* INDICES SECTION */
+  .indices-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .tab-bar { display: flex; gap: 3px; margin-bottom: 32px; background: rgba(6,9,15,0.5); border-radius: 11px; padding: 3px; width: fit-content; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 9px 20px; border: none; border-radius: 9px; background: transparent;
+    color: var(--text-muted); font-family: var(--font-body); font-size: 0.8rem;
+    font-weight: 500; cursor: pointer; transition: all .3s;
+  }
+  .tab-btn.active { background: var(--accent-dim); color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text-secondary); }
+
+  .index-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; backdrop-filter: blur(12px);
+    transition: all .35s; position: relative; overflow: hidden;
+  }
+  .index-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .index-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .index-ticker {
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+    padding: 3px 9px; border-radius: 6px; letter-spacing: 1px;
+  }
+  .index-ticker.us { background: var(--accent-dim); color: var(--accent); }
+  .index-ticker.eu { background: rgba(139,92,246,0.12); color: var(--accent2); }
+  .index-ticker.asia { background: var(--amber-dim); color: var(--amber); }
+  .index-name { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+  .index-full { font-size: 0.72rem; color: var(--text-muted); margin-top: 1px; }
+  .index-desc { color: var(--text-secondary); font-size: 0.83rem; line-height: 1.6; margin: 10px 0; }
+  .index-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .index-stat { background: rgba(6,9,15,0.4); border-radius: 9px; padding: 10px; text-align: center; }
+  .index-stat .val { font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; }
+  .index-stat .lbl { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 1px; }
+  .mini-chart { height: 36px; display: flex; align-items: flex-end; gap: 1.5px; margin-top: 12px; }
+  .mini-bar { flex: 1; border-radius: 1.5px 1.5px 0 0; min-height: 3px; transition: all .3s; }
+  .mini-bar.up { background: var(--green); }
+  .mini-bar.down { background: var(--red); }
+
+  /* TOOLS GRID */
+  .tools-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 0; border-top: 1px solid var(--border);
+    text-align: center; color: var(--text-muted); font-size: 0.75rem; line-height: 1.7;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .anim { animation: fadeUp .55s ease-out both; }
+  .d1 { animation-delay: .08s; } .d2 { animation-delay: .16s; }
+  .d3 { animation-delay: .24s; } .d4 { animation-delay: .32s; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 960px) {
+    .calc-grid { grid-template-columns: 1fr; gap: 24px; }
+    .tools-duo { grid-template-columns: 1fr; }
+    .indices-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .container { padding: 0 16px; }
+    section { padding: 48px 0; }
+    .hero { padding: 48px 0 36px; }
+    .hero h1 { font-size: 2rem; }
+    .hero p { font-size: 0.92rem; }
+    .input-row { grid-template-columns: 1fr; }
+    .index-stats { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .index-stat { padding: 8px; }
+    .result-big { font-size: 1.6rem; }
+    .card { padding: 22px; }
+    .result-panel { padding: 24px; min-height: 260px; }
+    .tab-bar { width: 100%; }
+    .tab-btn { flex: 1; text-align: center; padding: 9px 10px; font-size: 0.75rem; }
+  }
+  @media (max-width: 380px) {
+    .logo { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow a"></div>
+<div class="bg-glow b"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">FinVault<span class="logo-sub">Investment Intelligence</span></div>
+</header>
+
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <h1>Smart Tools for<br>Smarter Investing</h1>
+    <p>Compound interest modeling, inflation analysis, investment goal planning, and world index intelligence — entirely free, entirely private, entirely yours.</p>
+  </div>
+</section>
+
+
+<!-- COMPOUND INTEREST -->
+<section id="compound">
+  <div class="container">
+    <div class="section-label">Tool 01</div>
+    <h2 class="section-title">Compound Interest Engine</h2>
+    <p class="section-desc">See how time and compounding frequency can grow your wealth exponentially. Add regular contributions to model real-world saving strategies.</p>
+    <div class="calc-grid">
+      <div class="card anim">
+        <div class="calc-form">
+          <div class="input-group">
+            <label>Currency</label>
+            <select id="ciCurrency">
+              <option value="$" selected>USD ($)</option>
+              <option value="€">EUR (€)</option>
+              <option value="£">GBP (£)</option>
+              <option value="¥">JPY (¥)</option>
+              <option value="Fr">CHF (Fr)</option>
+              <option value="C$">CAD (C$)</option>
+              <option value="A$">AUD (A$)</option>
+              <option value="zł">PLN (zł)</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <div class="input-group"><label>Principal</label><input type="number" id="ciPrincipal" value="5000" min="0" step="100"></div>
+            <div class="input-group"><label>Monthly Contribution</label><input type="number" id="ciMonthly" value="200" min="0" step="10"></div>
+          </div>
+          <div class="input-row">
+            <div class="input-group"><label>Annual Rate (%)</label><input type="number" id="ciRate" value="8" min="0" max="100" step="0.1"></div>
+            <div class="input-group"><label>Time (Years)</label><input type="number" id="ciYears" value="20" min="1" max="100"></div>
+          </div>
+          <button class="btn-calc" onclick="calcCompound()">Calculate Growth</button>
+        </div>
+      </div>
+      <div class="result-panel anim d1" id="ciResults">
+        <div class="result-placeholder"><div class="icon">📈</div><p>Configure your parameters<br>and watch your wealth compound</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS DUO: Inflation + Goal -->
+<section id="tools">
+  <div class="container">
+    <div class="tools-duo">
+
+      <!-- INFLATION CALCULATOR -->
+      <div>
+        <div class="section-label">Tool 02</div>
+        <h2 class="section-title" style="font-size:clamp(1.4rem,3vw,1.9rem)">Inflation Erosion</h2>
+        <p class="section-desc" style="font-size:0.88rem;margin-bottom:28px;">See how inflation silently eats away at your purchasing power over time.</p>
+        <div class="card anim">
+          <div class="calc-form">
+            <div class="input-group">
+              <label>Currency</label>
+              <select id="infCurrency">
+                <option value="$" selected>USD ($)</option>
+                <option value="€">EUR (€)</option>
+                <option value="£">GBP (£)</option>
+                <option value="¥">JPY (¥)</option>
+                <option value="Fr">CHF (Fr)</option>
+                <option value="C$">CAD (C$)</option>
+                <option value="A$">AUD (A$)</option>
+                <option value="zł">PLN (zł)</option>
+              </select>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label>Amount Today</label><input type="number" id="infAmount" value="100000" min="0" step="1000"></div>
+              <div class="input-group"><label>Years</label><input type="number" id="infYears" value="25" min="1" max="100"></div>
+            </div>
+            <div class="input-group"><label>Avg. Inflation Rate (%)</label><input type="number" id="infRate" value="3" min="0" max="50" step="0.1"></div>
+            <button class="btn-calc" onclick="calcInflation()">See Impact</button>
+          </div>
+        </div>
+        <div class="result-panel anim d1" style="margin-top:16px;min-height:200px" id="infResults">
+          <div class="result-placeholder"><div class="icon">💸</div><p>Discover inflation's hidden cost</p></div>
+        </div>
+      </div>
+
+      <!-- GOAL CALCULATOR -->
+      <div>
+        <div class="section-label">Tool 03</div>
+        <h2 class="section-title" style="font-size:clamp(1.4rem,3vw,1.9rem)">Investment Goal Planner</h2>
+        <p class="section-desc" style="font-size:0.88rem;margin-bottom:28px;">How much do you need to save every month to reach your financial target?</p>
+        <div class="card anim">
+          <div class="calc-form">
+            <div class="input-group">
+              <label>Currency</label>
+              <select id="goalCurrency">
+                <option value="$" selected>USD ($)</option>
+                <option value="€">EUR (€)</option>
+                <option value="£">GBP (£)</option>
+                <option value="¥">JPY (¥)</option>
+                <option value="Fr">CHF (Fr)</option>
+                <option value="C$">CAD (C$)</option>
+                <option value="A$">AUD (A$)</option>
+                <option value="zł">PLN (zł)</option>
+              </select>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label>Target Amount</label><input type="number" id="goalTarget" value="1000000" min="0" step="1000"></div>
+              <div class="input-group"><label>Years to Goal</label><input type="number" id="goalYears" value="25" min="1" max="100"></div>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label>Starting Capital</label><input type="number" id="goalStart" value="10000" min="0" step="100"></div>
+              <div class="input-group"><label>Expected Return (%)</label><input type="number" id="goalRate" value="8" min="0" max="50" step="0.1"></div>
+            </div>
+            <button class="btn-calc" onclick="calcGoal()">Plan It</button>
+          </div>
+        </div>
+        <div class="result-panel anim d1" style="margin-top:16px;min-height:200px" id="goalResults">
+          <div class="result-placeholder"><div class="icon">🎯</div><p>Set your target and find your path</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- INDICES -->
+<section id="indices">
+  <div class="container">
+    <div class="section-label">Reference</div>
+    <h2 class="section-title">World Market Indices</h2>
+    <p class="section-desc">The most influential stock market indices, what they track, and why they matter.</p>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="filterIdx('all',this)">All</button>
+      <button class="tab-btn" onclick="filterIdx('us',this)">US</button>
+      <button class="tab-btn" onclick="filterIdx('eu',this)">Europe</button>
+      <button class="tab-btn" onclick="filterIdx('asia',this)">Asia</button>
+    </div>
+    <div class="indices-grid" id="indicesGrid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>FinVault — Built for long-term thinkers. All calculations run in your browser. Not financial advice.</p>
+    <p style="margin-top: 10px;">Made by <a href="https://instagram.com/pavyel_" target="_blank" rel="noopener">@pavyel_</a></p>
+  </div>
+</footer>
+
+<script>
+// ===== COMPOUND INTEREST (Yearly compounding + currency) =====
+function calcCompound() {
+  const cur = document.getElementById('ciCurrency').value;
+  const P = +document.getElementById('ciPrincipal').value || 0;
+  const m = +document.getElementById('ciMonthly').value || 0;
+  const r = +document.getElementById('ciRate').value / 100 || 0;
+  const t = +document.getElementById('ciYears').value || 1;
+  const n = 1; // yearly compounding
+  let bal = P; const totalC = P + m * 12 * t; let rows = [];
+  for (let y = 1; y <= t; y++) {
+    bal = bal * (1 + r) + m * 12;
+    rows.push({ y, bal, c: P + m * 12 * y });
+  }
+  const interest = bal - totalC;
+  const mult = totalC > 0 ? (bal / totalC) : 0;
+  const fmt = v => cur + v.toLocaleString(undefined,{maximumFractionDigits:0});
+  const tbl = rows.map(d => `<tr><td>${d.y}</td><td>${fmt(d.c)}</td><td style="color:var(--green)">${fmt(d.bal - d.c)}</td><td style="color:var(--accent)">${fmt(d.bal)}</td></tr>`).join('');
+  document.getElementById('ciResults').innerHTML = `<div class="result-content">
+    <div class="result-label">Future Value</div>
+    <div class="result-big">${cur}${bal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+    <div class="result-breakdown">
+      <div class="result-row"><span class="rr-label">Total Contributed</span><span class="rr-value">${fmt(totalC)}</span></div>
+      <div class="result-row"><span class="rr-label">Interest Earned</span><span class="rr-value green">${fmt(interest)}</span></div>
+      <div class="result-row"><span class="rr-label">Money Multiplier</span><span class="rr-value accent">${mult.toFixed(2)}×</span></div>
+    </div>
+    <div class="year-table"><table><thead><tr><th>Year</th><th>Contributed</th><th>Interest</th><th>Balance</th></tr></thead><tbody>${tbl}</tbody></table></div>
+  </div>`;
+}
+
+// ===== INFLATION CALCULATOR =====
+function calcInflation() {
+  const cur = document.getElementById('infCurrency').value;
+  const amt = +document.getElementById('infAmount').value || 0;
+  const yrs = +document.getElementById('infYears').value || 1;
+  const rate = +document.getElementById('infRate').value / 100 || 0;
+  const future = amt / Math.pow(1 + rate, yrs);
+  const lost = amt - future;
+  const pctLost = (lost / amt * 100);
+  const halfway = rate > 0 ? Math.log(2) / Math.log(1 + rate) : Infinity;
+  const fmt = v => cur + v.toLocaleString(undefined,{maximumFractionDigits:0});
+  const tbl = [];
+  for (let y = 1; y <= yrs; y++) {
+    if (y <= 10 || y % 5 === 0 || y === yrs) {
+      tbl.push({ y, val: amt / Math.pow(1+rate, y) });
+    }
+  }
+  const rows = tbl.map(d => `<tr><td>${d.y}</td><td style="color:var(--red)">${fmt(d.val)}</td><td style="color:var(--text-muted)">${((1 - d.val/amt)*100).toFixed(1)}%</td></tr>`).join('');
+  document.getElementById('infResults').innerHTML = `<div class="result-content">
+    <div class="result-label">Purchasing Power After ${yrs} Years</div>
+    <div class="result-big" style="color:var(--red)">${fmt(future)}</div>
+    <div class="result-breakdown">
+      <div class="result-row"><span class="rr-label">Value Destroyed</span><span class="rr-value red">−${fmt(lost)}</span></div>
+      <div class="result-row"><span class="rr-label">Power Lost</span><span class="rr-value red">${pctLost.toFixed(1)}%</span></div>
+      <div class="result-row"><span class="rr-label">Half-Life of Money</span><span class="rr-value accent">${halfway === Infinity ? '∞' : halfway.toFixed(1) + ' yrs'}</span></div>
+    </div>
+    <div class="year-table"><table><thead><tr><th>Year</th><th>Real Value</th><th>Lost</th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>`;
+}
+
+// ===== GOAL CALCULATOR =====
+function calcGoal() {
+  const cur = document.getElementById('goalCurrency').value;
+  const target = +document.getElementById('goalTarget').value || 0;
+  const yrs = +document.getElementById('goalYears').value || 1;
+  const start = +document.getElementById('goalStart').value || 0;
+  const rate = +document.getElementById('goalRate').value / 100 || 0;
+  const fvStart = start * Math.pow(1 + rate/12, yrs * 12);
+  const remaining = target - fvStart;
+  const r = rate / 12;
+  const n = yrs * 12;
+  let monthly = 0;
+  if (remaining > 0 && r > 0) {
+    monthly = remaining * r / (Math.pow(1 + r, n) - 1);
+  } else if (remaining > 0) {
+    monthly = remaining / n;
+  }
+  const totalContrib = start + monthly * n;
+  const totalInterest = target - totalContrib;
+  const daily = monthly / 30.44;
+  const fmt = v => cur + v.toLocaleString(undefined,{maximumFractionDigits:0});
+
+  document.getElementById('goalResults').innerHTML = `<div class="result-content">
+    <div class="result-label">Required Monthly Saving</div>
+    <div class="result-big" style="color:var(--accent)">${cur}${monthly.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+    <div class="result-breakdown">
+      <div class="result-row"><span class="rr-label">That's per day</span><span class="rr-value accent">${cur}${daily.toFixed(2)}</span></div>
+      <div class="result-row"><span class="rr-label">Total You'll Invest</span><span class="rr-value">${fmt(totalContrib)}</span></div>
+      <div class="result-row"><span class="rr-label">Market Does the Rest</span><span class="rr-value green">${fmt(totalInterest)}</span></div>
+      <div class="result-row"><span class="rr-label">Target</span><span class="rr-value accent">${fmt(target)}</span></div>
+      ${fvStart >= target ? `<div class="result-row"><span class="rr-label" style="color:var(--green)">Your starting capital alone reaches the goal!</span><span class="rr-value green">✓</span></div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ===== INDICES DATA =====
+const indicesData = [
+  { name:"S&P 500", full:"Standard & Poor's 500", ticker:"SPX", region:"us",
+    desc:"Tracks 500 of the largest U.S. companies by market cap, covering ~80% of available market value. The single most referenced benchmark for American large-cap equities.",
+    founded:"1957", components:"500", avg:"+10.5%",
+    chart:[60,65,58,70,72,68,75,80,77,85,82,88,90,87,95,92,98,100] },
+  { name:"Dow Jones", full:"Dow Jones Industrial Average", ticker:"DJIA", region:"us",
+    desc:"The oldest U.S. index (est. 1896), tracking 30 blue-chip stocks. Price-weighted, so high-priced stocks carry more influence. A symbol of American economic health.",
+    founded:"1896", components:"30", avg:"+9.8%",
+    chart:[50,52,48,55,58,54,60,63,59,65,62,68,70,67,73,75,72,78] },
+  { name:"NASDAQ 100", full:"NASDAQ-100 Index", ticker:"NDX", region:"us",
+    desc:"The 100 largest non-financial NASDAQ companies. Tech-dominated and growth-oriented, it's the go-to benchmark for innovation-focused investors.",
+    founded:"1985", components:"100", avg:"+14.2%",
+    chart:[40,48,42,55,62,56,68,75,70,82,78,88,92,85,98,95,105,110] },
+  { name:"Russell 2000", full:"Russell 2000 Index", ticker:"RUT", region:"us",
+    desc:"The premier U.S. small-cap benchmark. A barometer for the domestic economy, since small companies derive more revenue domestically.",
+    founded:"1984", components:"2000", avg:"+8.5%",
+    chart:[50,52,48,53,50,54,56,52,58,55,60,57,62,59,63,61,65,64] },
+  { name:"FTSE 100", full:"Financial Times Stock Exchange 100", ticker:"UKX", region:"eu",
+    desc:"The UK's flagship index of 100 largest LSE-listed companies. Weighted toward energy, finance, and consumer staples — more of a global earnings proxy than a pure UK indicator.",
+    founded:"1984", components:"100", avg:"+7.1%",
+    chart:[55,57,53,58,60,56,62,65,61,67,64,68,70,66,72,69,73,75] },
+  { name:"DAX", full:"Deutscher Aktienindex", ticker:"DAX", region:"eu",
+    desc:"Germany's blue-chip index of 40 companies. Uniquely a total-return index by default (includes dividends), making it a favorite for long-term analysis.",
+    founded:"1988", components:"40", avg:"+8.8%",
+    chart:[45,50,47,55,58,52,60,66,62,70,68,75,78,72,82,80,88,90] },
+  { name:"CAC 40", full:"Cotation Assistée en Continu", ticker:"CAC", region:"eu",
+    desc:"France's leading index of 40 companies on Euronext Paris. A cross-section of French industry including luxury (LVMH, Hermès), energy, and banking.",
+    founded:"1987", components:"40", avg:"+8.3%",
+    chart:[50,54,48,56,60,55,62,66,60,68,65,72,74,68,76,73,80,82] },
+  { name:"Euro Stoxx 50", full:"EURO STOXX 50", ticker:"SX5E", region:"eu",
+    desc:"50 blue-chip stocks from 11 Eurozone countries. A standardized pan-European benchmark, heavily used as the underlying for derivatives and ETFs.",
+    founded:"1998", components:"50", avg:"+7.4%",
+    chart:[48,52,46,54,58,53,60,64,58,66,63,70,72,66,74,72,78,80] },
+  { name:"Nikkei 225", full:"Nikkei Stock Average", ticker:"NKY", region:"asia",
+    desc:"Japan's most-watched equity gauge. Price-weighted like the Dow, the oldest index in Asia and a key barometer of the world's fourth-largest economy.",
+    founded:"1950", components:"225", avg:"+7.5%",
+    chart:[42,48,44,52,56,50,58,64,58,66,62,70,74,68,76,72,80,82] },
+  { name:"Hang Seng", full:"Hang Seng Index", ticker:"HSI", region:"asia",
+    desc:"Hong Kong's flagship index — a critical gateway for international investors accessing Chinese and Asia-Pacific markets.",
+    founded:"1969", components:"82", avg:"+6.2%",
+    chart:[65,60,62,55,58,50,54,48,52,50,55,52,58,54,60,56,62,60] },
+  { name:"Shanghai Comp.", full:"SSE Composite Index", ticker:"SHCOMP", region:"asia",
+    desc:"China's primary index, tracking all shares on the Shanghai Stock Exchange. As the world's second-largest economy, movements here have significant global implications.",
+    founded:"1991", components:"~2000", avg:"+5.8%",
+    chart:[55,58,52,56,60,54,58,62,56,60,58,64,66,60,68,64,70,68] },
+  { name:"KOSPI", full:"Korea Composite Stock Price Index", ticker:"KOSPI", region:"asia",
+    desc:"South Korea's main index. Heavily influenced by Samsung and the global semiconductor cycle, making it a tech-sentiment proxy in Asian markets.",
+    founded:"1983", components:"~940", avg:"+7.1%",
+    chart:[50,55,48,56,60,52,58,65,58,64,60,68,72,66,74,70,76,74] },
+];
+
+function renderIndices(filter='all') {
+  const grid = document.getElementById('indicesGrid');
+  const list = filter === 'all' ? indicesData : indicesData.filter(i => i.region === filter);
+  grid.innerHTML = list.map((idx, i) => {
+    const maxV = Math.max(...idx.chart);
+    const bars = idx.chart.map((v,j) => {
+      const h = (v/maxV)*100;
+      const up = j===0||idx.chart[j]>=idx.chart[j-1];
+      return `<div class="mini-bar ${up?'up':'down'}" style="height:${h}%"></div>`;
+    }).join('');
+    return `<div class="index-card anim d${(i%4)+1}" data-region="${idx.region}">
+      <div class="index-card-head">
+        <div><div class="index-name">${idx.name}</div><div class="index-full">${idx.full}</div></div>
+        <span class="index-ticker ${idx.region}">${idx.ticker}</span>
+      </div>
+      <p class="index-desc">${idx.desc}</p>
+      <div class="index-stats">
+        <div class="index-stat"><div class="val">${idx.founded}</div><div class="lbl">Founded</div></div>
+        <div class="index-stat"><div class="val">${idx.components}</div><div class="lbl">Stocks</div></div>
+        <div class="index-stat"><div class="val" style="color:var(--green)">${idx.avg}</div><div class="lbl">Avg / Year</div></div>
+      </div>
+      <div class="mini-chart">${bars}</div>
+    </div>`;
+  }).join('');
+}
+function filterIdx(r, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIndices(r);
+}
+
+renderIndices();
+calcCompound();
+calcInflation();
+calcGoal();
+
+// Intersection observer
+const obs = new IntersectionObserver(e => {
+  e.forEach(el => { if(el.isIntersecting) el.target.style.animationPlayState='running'; });
+}, { threshold: 0.08 });
+document.querySelectorAll('.anim').forEach(el => { el.style.animationPlayState='paused'; obs.observe(el); });
+</script>
+</body>
+</html>
